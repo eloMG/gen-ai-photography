@@ -1,5 +1,5 @@
 import numpy as np
-import tourch
+import torch
 
 def refram_to_thirds(Image, Subject = None, Return_mask = False):
     

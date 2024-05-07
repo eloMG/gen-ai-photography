@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
+from transformers import DetrImageProcessor, DetrForObjectDetection
 from transformers import SegformerImageProcessor, AutoModelForSemanticSegmentation
 from PIL import Image
 import torch.nn as nn
@@ -113,10 +114,37 @@ def get_person_cordinate(image):
 
     return head_avg_position
 
+def crop_subjects(image, subject, confidence_threshold=0.9):
+    processor = DetrImageProcessor.from_pretrained("facebook/detr-resnet-50", revision="no_timm")
+    model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50", revision="no_timm")
+
+    inputs = processor(images=image, return_tensors="pt")
+    outputs = model(**inputs)
+
+
+    target_sizes = torch.tensor([image.size[::-1]])
+    results = processor.post_process_object_detection(outputs, target_sizes=target_sizes, threshold=confidence_threshold)[0]
+
+    subject = "person"#temp
+
+    sub_images = []
+    for label, box in zip(results["labels"], results["boxes"]):
+        
+        if model.config.id2label[label.item()] == subject:
+            box = [round(i, 2) for i in box.tolist()]
+            sub_image = image.crop(box)
+            sub_images.append(sub_image)
+
+    return sub_images
+
 
 
 def refram_to_thirds(Image, Subject = None, Return_mask = False):
     width, height = Image.size
+        
+    #
+    
+    
     if Subject == "person":
         #curently only works for one person
         #will in futeure be able to work for multiple people

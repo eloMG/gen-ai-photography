@@ -14,9 +14,12 @@ def Draw_thirds(height, width):
     plt.axvline(2 * width / 3, color='blue')
 
 def shift_image(image_array, dx, dy, return_mask = False):
-    new_image_array = np.full_like(image_array, -1)#negative value is for mask
+    new_image_array = np.zeros_like(image_array).astype(float)#negative value is for mask
+    new_image_array.fill(-1)
+
     if dx > 0 and dy > 0:
         new_image_array[dy:, dx:,:] = image_array[0:-dy, 0:-dx,:] #shift image to the down and right
+        
     elif dx > 0 and dy < 0:
         new_image_array[0:dy, dx:,:] = image_array[-dy:, 0:-dx,:] #shift image to the up and right
     elif dx < 0 and dy > 0:
@@ -26,9 +29,11 @@ def shift_image(image_array, dx, dy, return_mask = False):
     
     mask = np.zeros((new_image_array.shape[0], new_image_array.shape[1]))
     mask[new_image_array[:,:,0] < 0] = 1
+    mask = mask.astype(bool)
     
     #remove negative values
     new_image_array[new_image_array < 0] = 0
+    new_image_array = new_image_array.astype(np.uint8)
     
     if return_mask:
         return new_image_array, mask
@@ -111,7 +116,38 @@ def get_person_cordinate(image):
 
 
 def refram_to_thirds(Image, Subject = None, Return_mask = False):
+    width, height = Image.size
+    if Subject == "person":
+        #curently only works for one person
+        #will in futeure be able to work for multiple people
+        focal_point = get_person_cordinate(Image)
+        n_subjects = 1#temporary
+        
+    else:
+        raise NotImplementedError("This function can only handle person as a subject for now.")
+    
+    if n_subjects == 1:
+        norm_head_avg_position = [focal_point[0] / height, focal_point[1] / width]
+        norm_thirds = np.array([[1 / 3, 1 / 3], [2 / 3, 2 / 3], [1 / 3, 2 / 3], [2 / 3, 1 / 3]])
+
+        norm_diff = [abs(norm_head_avg_position[0] - norm_third[0]) + abs(norm_head_avg_position[1] - norm_third[1]) for norm_third in norm_thirds]
+
+        closesed_third_index = np.argmin(norm_diff)
+        norm_diff_min = norm_diff[closesed_third_index]  # times six to get  as max value
+        closesed_third = norm_thirds[closesed_third_index]
+
+        #plt.scatter(closesed_third[1] * width, closesed_third[0] *height, color='pink')
+
+        # Draw an arrow from the first point to the second point
+        dx = closesed_third[1] * width - focal_point[1]
+        dy = closesed_third[0] * height - focal_point[0]
+        
+        dx = int(round(dx))
+        dy = int(round(dy))
+        
+    else:
+        raise NotImplementedError("This function can only handle one subject for now.")  
     
     
-    return 0 # Placeholder
+    return shift_image(np.array(Image), dx, dy, return_mask = Return_mask)
     

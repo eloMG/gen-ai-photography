@@ -8,7 +8,7 @@ def download_aadb():
     """
 
     url = 'https://drive.google.com/uc?id=1Viswtzb77vqqaaICAQz9iuZ8OEYCu6-_'
-    save_path = '/datasets/data'
+    save_path = 'datasets/data'
 
     # Create the save path if it doesn't exist
     os.makedirs(save_path, exist_ok=True)

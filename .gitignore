@@ -15,4 +15,6 @@ venv/
 .venv/
 test.py
 test2.py
-datasets/data/
+datasets/data/datasetImages_originalSize
+datasets/data/imgListFiles_label
+*.txt

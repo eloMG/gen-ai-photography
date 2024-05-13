@@ -1,6 +1,11 @@
 import gdown
+import torch
 import os
 import zipfile
+
+import torchvision.transforms as transforms
+from torchvision.datasets import ImageFolder
+
 
 def download_zip(url, save_path, name):
     """
@@ -8,6 +13,7 @@ def download_zip(url, save_path, name):
     """
 
     # Create the save path if it doesn't exist
+    save_path = os.path.join(save_path, name)
     os.makedirs(save_path, exist_ok=True)
 
     output = os.path.join(save_path, f'{name}.zip')
@@ -25,15 +31,17 @@ def save_aadb():
     """
     Dataset from paper https://arxiv.org/abs/1606.01621
     """
+    
     # Download images
     download_zip(url='https://drive.google.com/uc?id=1Viswtzb77vqqaaICAQz9iuZ8OEYCu6-_',
                  save_path='datasets/data',
                  name='datasetImages_originalSize')
     
-    # Download scores (file not public, need to request access)
-    download_zip(url='https://drive.google.com/uc?export=download&id=0BxeylfSgpk1MZ0hWWkoxb2hMU3c',
-                 save_path='datasets/data',
-                 name='imgListFiles_label')
+    # Unzip scores
+    if not os.path.exists('datasets/data/imgListFiles_label.zip'):
+        # Unzip the contents
+        with zipfile.ZipFile('datasets/data/imgListFiles_label.zip', 'r') as zip_ref:
+            zip_ref.extractall('datasets/data/imgListFiles_label')
     
     # Get a list of all files in the directory
     label_path = 'datasets/data/imgListFiles_label'
@@ -55,7 +63,7 @@ def save_aadb():
             concatenated_content += content
 
     # Rearrange the lines in alphabetical order
-    concatenated_content = '\n'.join(sorted(concatenated_content.split('\n')))
+    concatenated_content = '\n'.join(sorted(set(concatenated_content.split('\n'))))
     # Remove empty lines from the concatenated content
     concatenated_content = '\n'.join(line for line in concatenated_content.split('\n') if line.strip())
 
@@ -66,3 +74,30 @@ def save_aadb():
     # Write the concatenated content to the output file
     with open(output_file, 'w') as f:
         f.write(concatenated_content)
+
+
+class AADBDataset(torch.utils.data.Dataset):
+    def __init__(self, img_path, txt_path):
+
+        save_aadb()
+        transform = transforms.Compose([
+                transforms.Resize((512, 512)),
+                transforms.ToTensor()
+                ])
+        self.dataset = ImageFolder(root=img_path, transform=transform)
+
+        scores = []
+        file_path = os.path.join(txt_path, 'aadb_scores.txt')
+        with open(file_path, 'r') as file:
+            for line in file:
+                columns = line.split()
+                scores.append(float(columns[1]))
+
+        self.scores = torch.tensor(scores)
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, idx):
+        sample = {'image': self.dataset[idx][0], 'score': self.scores[idx]}
+        return sample

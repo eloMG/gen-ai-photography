@@ -17,4 +17,5 @@ test.py
 test2.py
 datasets/data/datasetImages_originalSize
 datasets/data/imgListFiles_label
+datasets/data/saved
 *.txt

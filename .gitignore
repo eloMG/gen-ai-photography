@@ -19,3 +19,4 @@ datasets/data/datasetImages_originalSize
 datasets/data/imgListFiles_label
 datasets/data/saved
 *.txt
+test*

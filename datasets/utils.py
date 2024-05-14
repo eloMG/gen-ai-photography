@@ -5,6 +5,8 @@ import zipfile
 
 import torchvision.transforms as transforms
 from torchvision.datasets import ImageFolder
+from transformers import BitsAndBytesConfig, pipeline
+from tqdm import tqdm
 
 
 def download_zip(url, save_path, name):
@@ -101,3 +103,31 @@ class AADBDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         sample = {'image': self.dataset[idx][0], 'score': self.scores[idx]}
         return sample
+    
+
+def get_prompts(dataset):
+
+    quantization_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_compute_dtype=torch.float16
+    )
+
+    model_id = "llava-hf/llava-1.5-7b-hf"
+
+    pipe = pipeline("image-to-text",
+                    model=model_id,
+                    model_kwargs={"quantization_config": quantization_config})
+
+    prompt = "USER: <image>\nProvide a short description of the image, to use as prompt for an image generating model\nASSISTANT:"
+
+    prompts = []
+    for i in tqdm(range(len(dataset) // 3)):
+        image = transforms.functional.to_pil_image(dataset[i]['image'])
+        outputs = pipe(image, prompt=prompt, generate_kwargs={"max_new_tokens": 200})
+        prompts.append(outputs[0]['generated_text'][108:])
+    
+    with open('datasets/data/aadb_prompts.txt', 'w') as file:
+        for string in prompts:
+            file.write(string + '\n')
+
+    return prompts

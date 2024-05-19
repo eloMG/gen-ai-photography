@@ -164,6 +164,7 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False):
     
     n_subjects = len(sub_images)
     
+    #temp code to check the focal points will be removed in future
     print(f"Number of subjects: {n_subjects}")
     
     focal_points = []
@@ -190,11 +191,12 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False):
             focal_points.append(current_focal_point)
 
     
-    # #temp code to check the focal points will be removed in future
-    # plt.imshow(Image)
-    # for focal_point in focal_points:
-    #     plt.scatter(focal_point[1], focal_point[0], color='pink')
-    # plt.show()
+    #temp code to check the focal points will be removed in future
+    plt.imshow(Image)
+    for focal_point in focal_points:
+        plt.scatter(focal_point[1], focal_point[0], label = f"Focal point {focal_points.index(focal_point)}")
+    plt.legend()
+    plt.show()
     
     
     
@@ -217,6 +219,47 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False):
         
         dx = int(round(dx))
         dy = int(round(dy))
+        
+    elif n_subjects == 2:
+        point_1 = focal_points[0]
+        point_2 = focal_points[1]
+        
+        point_1_norm = [point_1[0] / height, point_1[1] / width]
+        point_2_norm = [point_2[0] / height, point_2[1] / width]
+        
+        #get line vector between the two points
+        line_vector_norm = [point_2_norm[0] - point_1_norm[0], point_2_norm[1] - point_1_norm[1]]
+        
+        vector_ratio = line_vector_norm[0] / line_vector_norm[1]
+        
+        if abs(vector_ratio) > 2:
+            #fit to vertical line
+            
+            #temoprary
+            print("Vertical line")
+            dx, dy = 0, 0
+        elif abs(vector_ratio) > 0.5:
+            #fit to diagonal line
+            
+            #temoprary
+            print("Diagonal line")
+            dx, dy = 0, 0
+        else:# abs(vector_ratio) < 0.5:
+            #fit to horizontal line
+            
+            #temoprary
+            print("Horizontal line")
+            dx, dy = 0, 0
+        
+        print(f"Line vector: {line_vector_norm}")
+        
+        
+        #fit on line
+        
+        
+        
+        
+        
         
     else:
         raise NotImplementedError("This function can only handle one subject for now.")  

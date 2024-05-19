@@ -41,6 +41,12 @@ def shift_image(image_array, dx, dy, return_mask = False):
     else:
         return new_image_array
 
+def get_center_box(box):
+    x1, y1, x2, y2 = box
+    center = [(y1 + y2) / 2,  (x1 + x2)/ 2]
+    return center
+
+
 def get_person_cordinate(image):
     """
     This function takes an image as input, segments it to identify the person in the image, 
@@ -97,6 +103,7 @@ def get_person_cordinate(image):
     # List of class IDs you want to include
     class_ids = [11, 2, 1]  # Face, Hair, Hat class IDs to make head detection
 
+    
     # Create a mask for the specific classes
     mask = torch.zeros_like(pred_seg)
     for class_id in class_ids:
@@ -105,6 +112,11 @@ def get_person_cordinate(image):
     # Apply the mask to the segmented image
     class_seg = mask.float()
 
+    #check if the mask is empty
+    if class_seg.sum() == 0:
+        #return center of the image
+        return [image.size[1] // 2, image.size[0] // 2]
+    
     # Calculate the average position of the objects in the mask
     y_indices, x_indices = torch.where(mask)
     head_avg_position = [y_indices.float().mean().item(), x_indices.float().mean().item()]
@@ -114,7 +126,7 @@ def get_person_cordinate(image):
 
     return head_avg_position
 
-def crop_subjects(image, subject, confidence_threshold=0.9):
+def crop_subjects(image, subject, confidence_threshold=0.92, return_boxes=False):
     processor = DetrImageProcessor.from_pretrained("facebook/detr-resnet-50", revision="no_timm")
     model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50", revision="no_timm")
 
@@ -128,33 +140,64 @@ def crop_subjects(image, subject, confidence_threshold=0.9):
     subject = "person"#temp
 
     sub_images = []
+    sub_boxes = []
     for label, box in zip(results["labels"], results["boxes"]):
         
         if model.config.id2label[label.item()] == subject:
             box = [round(i, 2) for i in box.tolist()]
             sub_image = image.crop(box)
             sub_images.append(sub_image)
+            sub_boxes.append(box)
 
-    return sub_images
+    if return_boxes:
+        return sub_images, sub_boxes
+    else:
+        return sub_images
 
 
 
 def refram_to_thirds(Image, Subject = None, Return_mask = False):
     width, height = Image.size
-        
-    #
+    
+    #crop the image to get the subject and the cordinate boxes
+    sub_images, boxes = crop_subjects(Image, "person", return_boxes = True)
+    
+    n_subjects = len(sub_images)
+    
+    print(f"Number of subjects: {n_subjects}")
+    
+    focal_points = []
+    
+    #check if we have any subjects
+    if n_subjects == 0:
+        raise ValueError(f"Subject: {Subject} not found in the image.")
     
     
     if Subject == "person":
-        #curently only works for one person
-        #will in futeure be able to work for multiple people
-        focal_point = get_person_cordinate(Image)
-        n_subjects = 1#temporary
+        
+        for sub_image, box in zip(sub_images, boxes):
+            current_focal_point = get_person_cordinate(sub_image)
+            #convert focal point to the image coordinate
+            
+            current_focal_point = [current_focal_point[0] + box[1], current_focal_point[1] + box[0]]
+            
+            focal_points.append(current_focal_point)
+        
         
     else:
         raise NotImplementedError("This function can only handle person as a subject for now.")
     
+    
+    #temp code to check the focal points will be removed in future
+    plt.imshow(Image)
+    for focal_point in focal_points:
+        plt.scatter(focal_point[1], focal_point[0], color='pink')
+    plt.show()
+    
+    
+    
     if n_subjects == 1:
+        focal_point = focal_points[0]
         norm_head_avg_position = [focal_point[0] / height, focal_point[1] / width]
         norm_thirds = np.array([[1 / 3, 1 / 3], [2 / 3, 2 / 3], [1 / 3, 2 / 3], [2 / 3, 1 / 3]])
 

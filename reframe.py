@@ -185,14 +185,16 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False):
         
         
     else:
-        raise NotImplementedError("This function can only handle person as a subject for now.")
+        for sub_image, box in zip(sub_images, boxes):
+            current_focal_point = get_center_box(box)
+            focal_points.append(current_focal_point)
+
     
-    
-    #temp code to check the focal points will be removed in future
-    plt.imshow(Image)
-    for focal_point in focal_points:
-        plt.scatter(focal_point[1], focal_point[0], color='pink')
-    plt.show()
+    # #temp code to check the focal points will be removed in future
+    # plt.imshow(Image)
+    # for focal_point in focal_points:
+    #     plt.scatter(focal_point[1], focal_point[0], color='pink')
+    # plt.show()
     
     
     

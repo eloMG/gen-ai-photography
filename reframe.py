@@ -156,7 +156,7 @@ def crop_subjects(image, subject, confidence_threshold=0.92, return_boxes=False)
 
 
 
-def refram_to_thirds(Image, Subject = None, Return_mask = False):
+def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_points = False):
     width, height = Image.size
     
     #crop the image to get the subject and the cordinate boxes
@@ -191,14 +191,14 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False):
             focal_points.append(current_focal_point)
 
     
-    #temp code to check the focal points will be removed in future
-    plt.imshow(Image)
-    for focal_point in focal_points:
-        plt.scatter(focal_point[1], focal_point[0], label = f"Focal point {focal_points.index(focal_point)}")
-    plt.legend()
-    plt.show()
+    if show_focal_points:
+        plt.imshow(Image)
+        for focal_point in focal_points:
+            plt.scatter(focal_point[1], focal_point[0], label = f"Focal point {focal_points.index(focal_point)}")
+        plt.legend()
+        plt.show()
     
-    
+    output = None
     
     if n_subjects == 1:
         focal_point = focal_points[0]
@@ -220,6 +220,8 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False):
         dx = int(round(dx))
         dy = int(round(dy))
         
+        output = shift_image(np.array(Image), dx, dy, return_mask = Return_mask)
+        
     elif n_subjects == 2:
         point_1 = focal_points[0]
         point_2 = focal_points[1]
@@ -235,35 +237,113 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False):
         if abs(vector_ratio) > 2:
             #fit to vertical line
             
-            #temoprary
-            print("Vertical line")
-            dx, dy = 0, 0
+            if point_1_norm[0] > point_2_norm[0]:
+                #flip values so that we enshure point 1 is on top
+                point_1_norm, point_2_norm = point_2_norm, point_1_norm
+            
+            if point_1_norm[1] + point_2_norm[1] > 1:
+                #Fit to the right line
+                
+                dx = (2/3) * width - (point_2[1] + point_1[1]) / 2
+                dy = (1/2) * height - (point_2[0] + point_1[0]) / 2
+                
+                
+                dx = int(round(dx))
+                dy = int(round(dy))
+                
+                print(f"dx: {dx}, dy: {dy}")
+                #temporary
+                print("Vertical line, right")
+                #dx, dy = 0, 0
+            else:
+                #Fit to the left line
+                
+                
+                dx = (1/3) * width - (point_2[1] + point_1[1]) / 2
+                dy = (1/2) * height - (point_2[0] + point_1[0]) / 2
+                
+                
+                dx = int(round(dx))
+                dy = int(round(dy))
+                
+                print(f"dx: {dx}, dy: {dy}")
+                
+                
+                #temporary
+                print("Vertical line, left")
+                #dx, dy = 0, 0
+            
+
         elif abs(vector_ratio) > 0.5:
             #fit to diagonal line
             
             #temoprary
             print("Diagonal line")
-            dx, dy = 0, 0
+            
+            dx = (1/2) * width - (point_2[1] + point_1[1]) / 2
+            dy = (1/2) * height - (point_2[0] + point_1[0]) / 2
+            
+            dx = int(round(dx))
+            dy = int(round(dy))
+            
+            print(f"dx: {dx}, dy: {dy}")
+            
+            #dx, dy = 0, 0
+            
+        
+        
         else:# abs(vector_ratio) < 0.5:
             #fit to horizontal line
             
-            #temoprary
-            print("Horizontal line")
-            dx, dy = 0, 0
-        
+            if point_1_norm[1] > point_2_norm[1]:
+                #flip values so that we enshure point 1 is on left
+                point_1_norm, point_2_norm = point_2_norm, point_1_norm
+            
+            
+            if point_1_norm[0] + point_2_norm[0] > 1:
+                #Fit to the bottom line
+                
+                dx = (1/2) * width - (point_2[1] + point_1[1]) / 2
+                dy = (2/3) * height - (point_2[0] + point_1[0]) / 2
+                
+                
+                dx = int(round(dx))
+                dy = int(round(dy))
+                
+                print(f"dx: {dx}, dy: {dy}")
+                
+                #temporary
+                print("Horizontal line, bottom")
+                #dx, dy = 0, 0
+            else:
+                #fit to the top line
+                
+                dx = (1/2) * width - (point_2[1] + point_1[1]) / 2
+                dy = (1/3) * height - (point_2[0] + point_1[0]) / 2
+                
+                
+                dx = int(round(dx))
+                dy = int(round(dy))
+                
+                print(f"dx: {dx}, dy: {dy}")
+
+                #temporary
+                print("Horizontal line, top")
+            
+        #temoprary
         print(f"Line vector: {line_vector_norm}")
         
         
         #fit on line
-        
+        output = shift_image(np.array(Image), dx, dy, return_mask = Return_mask)
         
         
         
         
         
     else:
-        raise NotImplementedError("This function can only handle one subject for now.")  
+        raise NotImplementedError("This function can only handle up to 2 subject for now.")  
     
     
-    return shift_image(np.array(Image), dx, dy, return_mask = Return_mask)
+    return output
     

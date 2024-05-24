@@ -205,10 +205,8 @@ def zoom_image(image, zoom_factor, origin):
         new_image[:,:,:] = zoomed_image[origin_shift[0]:shape[0]+origin_shift[0], origin_shift[1]:shape[1]+origin_shift[1], :]
     else:
         shape = zoomed_image.shape
-        print(shape)
         origin_shift = [origin[0] - new_origin[0], origin[1] - new_origin[1]]
-        
-        
+    
         
         new_image[origin_shift[0]:shape[0]+origin_shift[0], origin_shift[1]:shape[1]+origin_shift[1], :] = zoomed_image[:,:,:]
     
@@ -311,10 +309,13 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
                 dx = int(round(dx))
                 dy = int(round(dy))
                 
-                print(f"dx: {dx}, dy: {dy}")
                 #temporary
+                print(f"dx: {dx}, dy: {dy}")
                 print("Vertical line, right")
-                #dx, dy = 0, 0
+                
+                zoom_origin = (height // 2, 2* width // 3)
+                
+                
             else:
                 #Fit to the left line
                 
@@ -326,14 +327,13 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
                 dx = int(round(dx))
                 dy = int(round(dy))
                 
-                print(f"dx: {dx}, dy: {dy}")
                 
-                r = (point_1[0]+dy - 1/2 * height) / ((2/3-1/3)*height)
-
-                print(f"r: {r}")
                 #temporary
+                print(f"dx: {dx}, dy: {dy}")
                 print("Vertical line, left")
-                #dx, dy = 0, 0
+                
+                
+                zoom_origin = (height // 2, width // 3)
             
 
         elif abs(vector_ratio) > 0.5:
@@ -348,9 +348,10 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
             dx = int(round(dx))
             dy = int(round(dy))
             
+            #temporary
             print(f"dx: {dx}, dy: {dy}")
             
-            #dx, dy = 0, 0
+            zoom_origin = (height // 2, width // 2)
             
         
         
@@ -372,11 +373,13 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
                 dx = int(round(dx))
                 dy = int(round(dy))
                 
-                print(f"dx: {dx}, dy: {dy}")
-                
                 #temporary
+                print(f"dx: {dx}, dy: {dy}")
                 print("Horizontal line, bottom")
-                #dx, dy = 0, 0
+                
+                zoom_origin = (2 * height // 3, width // 2)
+                
+                
             else:
                 #fit to the top line
                 
@@ -387,10 +390,11 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
                 dx = int(round(dx))
                 dy = int(round(dy))
                 
-                print(f"dx: {dx}, dy: {dy}")
-
                 #temporary
+                print(f"dx: {dx}, dy: {dy}")
                 print("Horizontal line, top")
+                
+                zoom_origin = (height // 3, width // 2)
             
         #temoprary
         print(f"Line vector: {line_vector_norm}")

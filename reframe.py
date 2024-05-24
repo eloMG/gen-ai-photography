@@ -268,7 +268,9 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
                 
                 print(f"dx: {dx}, dy: {dy}")
                 
-                
+                r = (point_1[0]+dy - 1/2 * height) / ((2/3-1/3)*height)
+
+                print(f"r: {r}")
                 #temporary
                 print("Vertical line, left")
                 #dx, dy = 0, 0

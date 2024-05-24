@@ -5,7 +5,7 @@ from transformers import DetrImageProcessor, DetrForObjectDetection
 from transformers import SegformerImageProcessor, AutoModelForSemanticSegmentation
 from PIL import Image
 import torch.nn as nn
-
+from scipy.ndimage import zoom
 
 
 def Draw_thirds(height, width):
@@ -154,6 +154,66 @@ def crop_subjects(image, subject, confidence_threshold=0.92, return_boxes=False)
     else:
         return sub_images
 
+
+def get_possible_subjects(image, confidence_threshold=0.92):
+    #needs to test
+    
+    processor = DetrImageProcessor.from_pretrained("facebook/detr-resnet-50", revision="no_timm")
+    model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50", revision="no_timm")
+
+    inputs = processor(images=image, return_tensors="pt")
+    outputs = model(**inputs)
+
+
+    target_sizes = torch.tensor([image.size[::-1]])
+    results = processor.post_process_object_detection(outputs, target_sizes=target_sizes, threshold=confidence_threshold)[0]
+
+    subjects = []
+    for label, box in zip(results["labels"], results["boxes"]):
+        subjects.append(model.config.id2label[label.item()])
+
+    #only return unique subjects
+    subjects = list(set(subjects))
+    
+    return subjects
+
+
+
+def zoom_image(image, zoom_factor, origin):
+    # Calculate the new shape of the image
+    
+    new_image = np.full_like(image, -1)
+    
+    red, green, blue = image[:,:,0], image[:,:,1], image[:,:,2]
+
+    # Zoom each color channel separately
+    red_zoomed = zoom(red, zoom_factor, order=3)
+    green_zoomed = zoom(green, zoom_factor, order=3)
+    blue_zoomed = zoom(blue, zoom_factor, order=3)
+
+    # Stack the zoomed color channels back into a single image
+    zoomed_image = np.stack([red_zoomed, green_zoomed, blue_zoomed], axis=-1)
+    
+    
+    
+    new_origin = [int(origin[0] * zoom_factor), int(origin[1] * zoom_factor)]
+    
+    if zoom_factor > 1:
+        shape = image.shape
+        origin_shift = [new_origin[0] - origin[0], new_origin[1] - origin[1]]
+        
+        new_image[:,:,:] = zoomed_image[origin_shift[0]:shape[0]+origin_shift[0], origin_shift[1]:shape[1]+origin_shift[1], :]
+    else:
+        shape = zoomed_image.shape
+        print(shape)
+        origin_shift = [origin[0] - new_origin[0], origin[1] - new_origin[1]]
+        
+        
+        
+        new_image[origin_shift[0]:shape[0]+origin_shift[0], origin_shift[1]:shape[1]+origin_shift[1], :] = zoomed_image[:,:,:]
+    
+    
+    return new_image
 
 
 def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_points = False):

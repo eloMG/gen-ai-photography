@@ -32,6 +32,7 @@ def shift_image(image_array, dx, dy, return_mask = False):
     mask[new_image_array[:,:,0] < 0] = 1
     mask = mask.astype(bool)
     
+  
     #remove negative values
     new_image_array[new_image_array < 0] = 0
     new_image_array = new_image_array.astype(np.uint8)
@@ -227,6 +228,9 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
     
     focal_points = []
     
+    zoom_factor = 1
+    zoom_origin = (0,0)
+    
     #check if we have any subjects
     if n_subjects == 0:
         raise ValueError(f"Subject: {Subject} not found in the image.")
@@ -278,7 +282,11 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
         dx = int(round(dx))
         dy = int(round(dy))
         
-        output = shift_image(np.array(Image), dx, dy, return_mask = Return_mask)
+        if Return_mask:
+            output_image, mask = shift_image(np.array(Image), dx, dy, return_mask = True)
+        else:
+            
+            output_image = shift_image(np.array(Image), dx, dy, return_mask = Return_mask)
         
     elif n_subjects == 2:
         point_1 = focal_points[0]
@@ -401,15 +409,25 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
         
         
         #fit on line
-        output = shift_image(np.array(Image), dx, dy, return_mask = Return_mask)
         
+        shifted_image, mask = shift_image(np.array(Image), dx, dy, return_mask = True)
         
+        shifted_image_and_mask = shifted_image.astype(int)
+        shifted_image_and_mask[mask] = -1
         
+        output_image = zoom_image(shifted_image_and_mask, zoom_factor, zoom_origin)
+        
+        mask = output_image[:,:,0] < 0
+        #remove negative values
+        output_image[output_image < 0] = 0
         
         
     else:
         raise NotImplementedError("This function can only handle up to 2 subject for now.")  
     
-    
-    return output
+    if Return_mask:
+        return output_image, mask
+    else:
+        return output_image
+
     

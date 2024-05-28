@@ -22,3 +22,4 @@ dataset/data/imgListFiles_label/
 dataset/data/saved/
 test_llava.ipynb
 dataset/__pycache__/
+*_scores.txt

@@ -36,17 +36,17 @@ def save_aadb():
     
     # Download images
     download_zip(url='https://drive.google.com/uc?id=1Viswtzb77vqqaaICAQz9iuZ8OEYCu6-_',
-                 save_path='datasets/data',
+                 save_path='dataset/data',
                  name='datasetImages_originalSize')
     
     # Unzip scores
-    if not os.path.exists('datasets/data/imgListFiles_label.zip'):
+    if not os.path.exists('dataset/data/imgListFiles_label'):
         # Unzip the contents
-        with zipfile.ZipFile('datasets/data/imgListFiles_label.zip', 'r') as zip_ref:
-            zip_ref.extractall('datasets/data/imgListFiles_label')
+        with zipfile.ZipFile('dataset/data/imgListFiles_label.zip', 'r') as zip_ref:
+            zip_ref.extractall('dataset/data/imgListFiles_label')
     
     # Get a list of all files in the directory
-    label_path = 'datasets/data/imgListFiles_label'
+    label_path = 'dataset/data/imgListFiles_label'
     file_list = os.listdir(label_path)
 
     # Filter the list to include only files ending with "_score"
@@ -71,7 +71,7 @@ def save_aadb():
 
 
     # Create the output file path
-    output_file = os.path.join('datasets/data', 'aadb_scores.txt')
+    output_file = os.path.join('dataset/data', 'aadb_scores.txt')
 
     # Write the concatenated content to the output file
     with open(output_file, 'w') as f:
@@ -126,7 +126,7 @@ def get_prompts(dataset):
         outputs = pipe(image, prompt=prompt, generate_kwargs={"max_new_tokens": 200})
         prompts.append(outputs[0]['generated_text'][108:])
     
-    with open('datasets/data/aadb_prompts.txt', 'w') as file:
+    with open('dataset/data/aadb_prompts.txt', 'w') as file:
         for string in prompts:
             file.write(string + '\n')
 

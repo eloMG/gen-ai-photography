@@ -138,7 +138,6 @@ def crop_subjects(image, subject, confidence_threshold=0.92, return_boxes=False)
     target_sizes = torch.tensor([image.size[::-1]])
     results = processor.post_process_object_detection(outputs, target_sizes=target_sizes, threshold=confidence_threshold)[0]
 
-    subject = "person"#temp
 
     sub_images = []
     sub_boxes = []
@@ -228,6 +227,7 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
     
     focal_points = []
     
+    #some temporary variables
     zoom_factor = 1
     zoom_origin = (0,0)
     
@@ -322,6 +322,11 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
                 print("Vertical line, right")
                 
                 zoom_origin = (height // 2, 2* width // 3)
+                
+                
+                zoom_factor = 1
+                
+                
                 
                 
             else:

@@ -307,6 +307,11 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
                 #flip values so that we enshure point 1 is on top
                 point_1_norm, point_2_norm = point_2_norm, point_1_norm
             
+            #calculate distance between the point in normelized spaced
+            vertical_distance = abs(point_2_norm[0] - point_1_norm[0])
+            
+            zoom_factor = 0.5 / vertical_distance
+            
             if point_1_norm[1] + point_2_norm[1] > 1:
                 #Fit to the right line
                 
@@ -324,7 +329,6 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
                 zoom_origin = (height // 2, 2* width // 3)
                 
                 
-                zoom_factor = 1
                 
                 
                 
@@ -352,6 +356,9 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
         elif abs(vector_ratio) > 0.5:
             #fit to diagonal line
             
+            distance = np.sqrt((point_2_norm[0] - point_1_norm[0])**2 + (point_2_norm[1] - point_1_norm[1])**2)
+            zoom_factor = 2**(1/2) / 2 / distance
+            
             #temoprary
             print("Diagonal line")
             
@@ -374,6 +381,10 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
             if point_1_norm[1] > point_2_norm[1]:
                 #flip values so that we enshure point 1 is on left
                 point_1_norm, point_2_norm = point_2_norm, point_1_norm
+            
+            horizontal_distance = abs(point_2_norm[1] - point_1_norm[1])
+            
+            zoom_factor = 0.5 / horizontal_distance
             
             
             if point_1_norm[0] + point_2_norm[0] > 1:
@@ -419,6 +430,10 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
         
         shifted_image_and_mask = shifted_image.astype(int)
         shifted_image_and_mask[mask] = -1
+        
+        #Temporary
+        print(f"zoom factor: {zoom_factor}, zoom origin: {zoom_origin}")
+        
         
         output_image = zoom_image(shifted_image_and_mask, zoom_factor, zoom_origin)
         

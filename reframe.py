@@ -214,7 +214,7 @@ def zoom_image(image, zoom_factor, origin):
     return new_image
 
 
-def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_points = False):
+def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_points = False, allow_zoom = True):
     width, height = Image.size
     
     #crop the image to get the subject and the cordinate boxes
@@ -429,17 +429,19 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
         shifted_image, mask = shift_image(np.array(Image), dx, dy, return_mask = True)
         
         shifted_image_and_mask = shifted_image.astype(int)
-        shifted_image_and_mask[mask] = -1
+        if allow_zoom:
+            shifted_image_and_mask[mask] = -1
+            
+            #Temporary
+            print(f"zoom factor: {zoom_factor}, zoom origin: {zoom_origin}")
         
-        #Temporary
-        print(f"zoom factor: {zoom_factor}, zoom origin: {zoom_origin}")
-        
-        
-        output_image = zoom_image(shifted_image_and_mask, zoom_factor, zoom_origin)
-        
-        mask = output_image[:,:,0] < 0
-        #remove negative values
-        output_image[output_image < 0] = 0
+            output_image = zoom_image(shifted_image_and_mask, zoom_factor, zoom_origin)
+            
+            mask = output_image[:,:,0] < 0
+            #remove negative values
+            output_image[output_image < 0] = 0
+        else:
+            output_image = shifted_image
         
         
     else:

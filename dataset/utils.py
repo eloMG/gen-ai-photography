@@ -46,7 +46,7 @@ def save_aadb():
             zip_ref.extractall('dataset/data/imgListFiles_label')
     
     # Get a list of all files in the directory
-    label_path = 'dataset/data/imgListFiles_label'
+    label_path = os.path.join('dataset', 'data', 'imgListFiles_label')
     file_list = os.listdir(label_path)
 
     # Filter the list to include only files ending with "_score"
@@ -71,7 +71,7 @@ def save_aadb():
 
 
     # Create the output file path
-    output_file = os.path.join('dataset/data', 'aadb_scores.txt')
+    output_file = os.path.normpath(os.path.join('dataset/data', 'aadb_scores.txt'))
 
     # Write the concatenated content to the output file
     with open(output_file, 'w') as f:
@@ -81,7 +81,9 @@ def save_aadb():
 class AADBDataset(torch.utils.data.Dataset):
     def __init__(self, img_path, txt_path):
 
-        save_aadb()
+        if not os.path.exists(os.path.normpath(os.path.join(txt_path, 'aadb_scores.txt'))):
+            save_aadb()
+
         transform = transforms.Compose([
                 transforms.Resize((512, 512)),
                 transforms.ToTensor()
@@ -89,7 +91,7 @@ class AADBDataset(torch.utils.data.Dataset):
         self.dataset = ImageFolder(root=img_path, transform=transform)
 
         scores = []
-        file_path = os.path.join(txt_path, 'aadb_scores.txt')
+        file_path = os.path.normpath(os.path.join(txt_path, 'aadb_scores.txt'))
         with open(file_path, 'r') as file:
             for line in file:
                 columns = line.split()

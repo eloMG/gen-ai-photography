@@ -293,9 +293,28 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
             
             output_image = shift_image(np.array(Image), dx, dy, return_mask = Return_mask)
         
-    elif n_subjects == 2:
-        point_1 = focal_points[0]
-        point_2 = focal_points[1]
+    else: 
+        if n_subjects == 2:
+            point_1 = focal_points[0]
+            point_2 = focal_points[1]
+        else:  # more than 2 subjects/focal points
+            # Convert focal_points to a 2D numpy array
+            focal_points = np.array(focal_points)
+
+            # Compute the line vector (direction) from the first two focal points
+            line_vector = focal_points[1] - focal_points[0]
+            line_vector_norm = line_vector / np.linalg.norm(line_vector)
+
+            # Project all focal points onto the line
+            projections = np.dot(focal_points, line_vector_norm)
+
+            # Find the indices of the two points with the minimum and maximum projections
+            min_index = np.argmin(projections)
+            max_index = np.argmax(projections)
+
+            # These are the two extreme points
+            point_1 = focal_points[min_index]
+            point_2 = focal_points[max_index]
         
         point_1_norm = [point_1[0] / height, point_1[1] / width]
         point_2_norm = [point_2[0] / height, point_2[1] / width]
@@ -444,9 +463,6 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
             output_image = shifted_image
         
         
-    else:
-        raise NotImplementedError("This function can only handle up to 2 subject for now.")  
-    
     if Return_mask:
         return output_image, mask
     else:

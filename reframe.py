@@ -179,10 +179,11 @@ def get_possible_subjects(image, confidence_threshold=0.92):
 
 
 
-def zoom_image(image, zoom_factor, origin):
+def zoom_image_and_mask(image, mask, zoom_factor, origin):
     # Calculate the new shape of the image
     
-    new_image = np.full_like(image, -1)
+    new_image = np.zeros_like(image)
+    new_mask = np.ones_like(mask).astype(bool)
     
     red, green, blue = image[:,:,0], image[:,:,1], image[:,:,2]
 
@@ -191,6 +192,8 @@ def zoom_image(image, zoom_factor, origin):
     green_zoomed = zoom(green, zoom_factor, order=3)
     blue_zoomed = zoom(blue, zoom_factor, order=3)
 
+    mask_zoomed = zoom(mask, zoom_factor, order=0)
+    
     # Stack the zoomed color channels back into a single image
     zoomed_image = np.stack([red_zoomed, green_zoomed, blue_zoomed], axis=-1)
     
@@ -203,18 +206,20 @@ def zoom_image(image, zoom_factor, origin):
         origin_shift = [new_origin[0] - origin[0], new_origin[1] - origin[1]]
         
         new_image[:,:,:] = zoomed_image[origin_shift[0]:shape[0]+origin_shift[0], origin_shift[1]:shape[1]+origin_shift[1], :]
+        new_mask[:,:] = mask_zoomed[origin_shift[0]:shape[0]+origin_shift[0], origin_shift[1]:shape[1]+origin_shift[1]]
+        
     else:
         shape = zoomed_image.shape
         origin_shift = [origin[0] - new_origin[0], origin[1] - new_origin[1]]
     
         
         new_image[origin_shift[0]:shape[0]+origin_shift[0], origin_shift[1]:shape[1]+origin_shift[1], :] = zoomed_image[:,:,:]
+        new_mask[origin_shift[0]:shape[0]+origin_shift[0], origin_shift[1]:shape[1]+origin_shift[1]] = mask_zoomed[:,:]
     
-    
-    return new_image
+    return new_image, new_mask
 
 
-def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_points = False):
+def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_points = False, allow_zoom = True):
     width, height = Image.size
     
     #crop the image to get the subject and the cordinate boxes
@@ -288,9 +293,28 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
             
             output_image = shift_image(np.array(Image), dx, dy, return_mask = Return_mask)
         
-    elif n_subjects == 2:
-        point_1 = focal_points[0]
-        point_2 = focal_points[1]
+    else: 
+        if n_subjects == 2:
+            point_1 = focal_points[0]
+            point_2 = focal_points[1]
+        else:  # more than 2 subjects/focal points
+            # Convert focal_points to a 2D numpy array
+            focal_points = np.array(focal_points)
+
+            # Compute the line vector (direction) from the first two focal points
+            line_vector = focal_points[1] - focal_points[0]
+            line_vector_norm = line_vector / np.linalg.norm(line_vector)
+
+            # Project all focal points onto the line
+            projections = np.dot(focal_points, line_vector_norm)
+
+            # Find the indices of the two points with the minimum and maximum projections
+            min_index = np.argmin(projections)
+            max_index = np.argmax(projections)
+
+            # These are the two extreme points
+            point_1 = focal_points[min_index]
+            point_2 = focal_points[max_index]
         
         point_1_norm = [point_1[0] / height, point_1[1] / width]
         point_2_norm = [point_2[0] / height, point_2[1] / width]
@@ -428,23 +452,17 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
         
         shifted_image, mask = shift_image(np.array(Image), dx, dy, return_mask = True)
         
-        shifted_image_and_mask = shifted_image.astype(int)
-        shifted_image_and_mask[mask] = -1
+        if allow_zoom:
+            
+            #Temporary
+            print(f"zoom factor: {zoom_factor}, zoom origin: {zoom_origin}")
         
-        #Temporary
-        print(f"zoom factor: {zoom_factor}, zoom origin: {zoom_origin}")
-        
-        
-        output_image = zoom_image(shifted_image_and_mask, zoom_factor, zoom_origin)
-        
-        mask = output_image[:,:,0] < 0
-        #remove negative values
-        output_image[output_image < 0] = 0
+            output_image, mask = zoom_image_and_mask(shifted_image, mask, zoom_factor, zoom_origin)
+
+        else:
+            output_image = shifted_image
         
         
-    else:
-        raise NotImplementedError("This function can only handle up to 2 subject for now.")  
-    
     if Return_mask:
         return output_image, mask
     else:

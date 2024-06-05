@@ -179,10 +179,11 @@ def get_possible_subjects(image, confidence_threshold=0.92):
 
 
 
-def zoom_image(image, zoom_factor, origin):
+def zoom_image_and_mask(image, mask, zoom_factor, origin):
     # Calculate the new shape of the image
     
-    new_image = np.full_like(image, -1)
+    new_image = np.zeros_like(image)
+    new_mask = np.ones_like(mask).astype(bool)
     
     red, green, blue = image[:,:,0], image[:,:,1], image[:,:,2]
 
@@ -191,6 +192,8 @@ def zoom_image(image, zoom_factor, origin):
     green_zoomed = zoom(green, zoom_factor, order=3)
     blue_zoomed = zoom(blue, zoom_factor, order=3)
 
+    mask_zoomed = zoom(mask, zoom_factor, order=0)
+    
     # Stack the zoomed color channels back into a single image
     zoomed_image = np.stack([red_zoomed, green_zoomed, blue_zoomed], axis=-1)
     
@@ -203,15 +206,17 @@ def zoom_image(image, zoom_factor, origin):
         origin_shift = [new_origin[0] - origin[0], new_origin[1] - origin[1]]
         
         new_image[:,:,:] = zoomed_image[origin_shift[0]:shape[0]+origin_shift[0], origin_shift[1]:shape[1]+origin_shift[1], :]
+        new_mask[:,:] = mask_zoomed[origin_shift[0]:shape[0]+origin_shift[0], origin_shift[1]:shape[1]+origin_shift[1]]
+        
     else:
         shape = zoomed_image.shape
         origin_shift = [origin[0] - new_origin[0], origin[1] - new_origin[1]]
     
         
         new_image[origin_shift[0]:shape[0]+origin_shift[0], origin_shift[1]:shape[1]+origin_shift[1], :] = zoomed_image[:,:,:]
+        new_mask[origin_shift[0]:shape[0]+origin_shift[0], origin_shift[1]:shape[1]+origin_shift[1]] = mask_zoomed[:,:]
     
-    
-    return new_image
+    return new_image, new_mask
 
 
 def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_points = False, allow_zoom = True):
@@ -428,18 +433,13 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
         
         shifted_image, mask = shift_image(np.array(Image), dx, dy, return_mask = True)
         
-        shifted_image_and_mask = shifted_image.astype(int)
         if allow_zoom:
-            shifted_image_and_mask[mask] = -1
             
             #Temporary
             print(f"zoom factor: {zoom_factor}, zoom origin: {zoom_origin}")
         
-            output_image = zoom_image(shifted_image_and_mask, zoom_factor, zoom_origin)
-            
-            mask = output_image[:,:,0] < 0
-            #remove negative values
-            output_image[output_image < 0] = 0
+            output_image, mask = zoom_image_and_mask(shifted_image, mask, zoom_factor, zoom_origin)
+
         else:
             output_image = shifted_image
         

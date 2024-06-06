@@ -14,7 +14,7 @@ from reframe import get_possible_subjects, refram_to_thirds
 
 #importing image temporarily will later take input from earlier in pipline
 #Image path 
-img_path = "Test_data\86b80553-5091-48f5-ab74-852ba5ea1caa.webp"
+img_path = "Test_data/103383478.webp"
 image = Image.open(img_path)
 
 #Get possible subjects
@@ -54,6 +54,31 @@ while allow_zoom is None:
 
 
 image, mask = refram_to_thirds(image, Subject = subject, Return_mask = True, show_focal_points=False, allow_zoom = allow_zoom)
+
+#ask user if they wanto to add infill
+do_infill = None
+while do_infill is None:
+    infill_suggestion = input("Do you want to add infill to the reframed image? (y/n): ")
+    if infill_suggestion.lower() == "y":
+        do_infill = True
+    elif infill_suggestion.lower() == "n":
+        do_infill = False
+    else:
+        print("Invalid input. Please try again.")
+
+if do_infill:
+    from infill import Infill
+
+    print("Next we add infill to the reframed image.")
+    print("please add the following prompts for infill(if not just press enter):")
+
+    prompt = input("Prompt: ")
+
+
+
+
+image = Infill(image, mask, prompt = prompt)
+
 
 #plot new image
 plt.imshow(image)

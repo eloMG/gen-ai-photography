@@ -53,9 +53,8 @@ while allow_zoom is None:
         print("Invalid input. Please try again.")
 
 
-image, mask = refram_to_thirds(image, Subject = subject, Return_mask = True, show_focal_points=True, allow_zoom = allow_zoom)
+image, mask = refram_to_thirds(image, Subject = subject, Return_mask = True, show_focal_points=False, allow_zoom = allow_zoom)
 
 #plot new image
 plt.imshow(image)
-plt.axis('off')
 plt.show()

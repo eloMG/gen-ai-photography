@@ -247,7 +247,7 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
     width, height = Image.size
     
     #crop the image to get the subject and the cordinate boxes
-    sub_images, boxes = crop_subjects(Image, "person", return_boxes = True)
+    sub_images, boxes = crop_subjects(Image, Subject, return_boxes = True)
     
     n_subjects = len(sub_images)
     
@@ -259,6 +259,8 @@ def refram_to_thirds(Image, Subject = None, Return_mask = False, show_focal_poin
     #some temporary variables
     zoom_factor = 1
     zoom_origin = (0,0)
+    
+    
     
     #check if we have any subjects
     if n_subjects == 0:

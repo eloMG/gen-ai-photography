@@ -2,11 +2,6 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 
-
-
-
-
-
 ##########################
 #Reframing
 ###########################
@@ -14,7 +9,7 @@ from reframe import get_possible_subjects, refram_to_thirds, Display_object_dete
 
 #importing image temporarily will later take input from earlier in pipline
 #Image path 
-img_path = "Test_data/103383478.webp"
+img_path = "Test_data/2706.jpg"
 image = Image.open(img_path)
 
 #Get possible subjects
@@ -75,8 +70,6 @@ if do_infill:
     print("please add the following prompts for infill(if not just press enter):")
 
     prompt = input("Prompt: ")
-
-
 
 
 image = Infill(image, mask, prompt = prompt)

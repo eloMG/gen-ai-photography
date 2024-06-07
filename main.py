@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 ##########################
 #Reframing
 ###########################
-from reframe import get_possible_subjects, refram_to_thirds
+from reframe import get_possible_subjects, refram_to_thirds, Display_object_detection
 
 #importing image temporarily will later take input from earlier in pipline
 #Image path 
@@ -23,7 +23,7 @@ possible_subjects = get_possible_subjects(image)
 print("List of possible subjects:")
 for i, subject in enumerate(possible_subjects):
     print(f"{i+1}. {subject}")
-print("Write the number or name of the subject you want to reframe")
+print("Write the number or name of the subject you want to reframe or write show to see the object detection result.")
 subject = None
 
 #getting subject from user
@@ -39,6 +39,8 @@ while subject is None:
     else:
         if subject_suggestion in possible_subjects:
             subject = subject_suggestion
+        elif subject_suggestion == "show":
+            Display_object_detection(image)
         else:
             print("Invalid input. Please try again.")
 

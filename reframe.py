@@ -127,6 +127,30 @@ def get_person_cordinate(image):
 
     return head_avg_position
 
+def Display_object_detection(image,confidence_threshold=0.92):
+    processor = DetrImageProcessor.from_pretrained("facebook/detr-resnet-50", revision="no_timm")
+    model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50", revision="no_timm")
+
+    inputs = processor(images=image, return_tensors="pt")
+    outputs = model(**inputs)
+
+
+    target_sizes = torch.tensor([image.size[::-1]])
+    results = processor.post_process_object_detection(outputs, target_sizes=target_sizes, threshold=confidence_threshold)[0]
+    
+    plt.imshow(image)
+    for label, box in zip(results["labels"], results["boxes"]):
+        box  = box.detach().cpu().numpy()
+        plt.plot(
+            [box[0], box[2], box[2], box[0], box[0]],
+            [box[1], box[1], box[3], box[3], box[1]],
+            linewidth=2,
+            label=model.config.id2label[label.item()],
+        )
+    plt.legend()
+    plt.show()
+
+
 def crop_subjects(image, subject, confidence_threshold=0.92, return_boxes=False):
     processor = DetrImageProcessor.from_pretrained("facebook/detr-resnet-50", revision="no_timm")
     model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50", revision="no_timm")

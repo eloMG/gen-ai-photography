@@ -46,7 +46,7 @@ def save_aadb():
             zip_ref.extractall('dataset/data/imgListFiles_label')
     
     # Get a list of all files in the directory
-    label_path = os.path.join('dataset', 'data', 'imgListFiles_label')
+    label_path = os.path.join('dataset', 'data', 'imgListFiles_label', 'imgListFiles_label')
     file_list = os.listdir(label_path)
 
     # Filter the list to include only files ending with "_score"

@@ -48,7 +48,7 @@ def get_center_box(box):
     return center
 
 
-def get_person_cordinate(image):
+def get_person_cordinate(image, return_segmentation = False, return_head_segmentation = False):
     """
     This function takes an image as input, segments it to identify the person in the image, 
     and extracts the average position of the person's head. The position is then returned 
@@ -126,7 +126,15 @@ def get_person_cordinate(image):
     # Convert the position to integers
     head_avg_position = [int(round(pos)) for pos in head_avg_position]
 
-    return head_avg_position
+    
+    if return_segmentation and return_head_segmentation:
+        return head_avg_position, pred_seg, mask
+    elif return_segmentation:
+        return head_avg_position, pred_seg
+    elif return_head_segmentation:
+        return head_avg_position, mask
+    else:
+        return head_avg_position
 
 def Display_object_detection(image,confidence_threshold=0.92):
     image = image.convert("RGB")

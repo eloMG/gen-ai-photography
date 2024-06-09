@@ -150,6 +150,7 @@ def Display_object_detection(image,confidence_threshold=0.92):
             label=model.config.id2label[label.item()],
         )
     plt.legend()
+    plt.axis("off")
     plt.show()
 
 

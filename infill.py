@@ -8,6 +8,7 @@ from diffusers import StableDiffusionInpaintPipeline
 
 def Infill(image, mask, prompt = ""):
 
+    image = image[:, :, :3] #remove alpha channel if present
     #checks if infill is needed
     infill_needed = mask.any()
     if infill_needed:

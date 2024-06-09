@@ -9,7 +9,7 @@ from reframe import get_possible_subjects, refram_to_thirds, Display_object_dete
 
 #importing image temporarily will later take input from earlier in pipline
 #Image path 
-img_path = "Test_data/git 2706.jpg"
+img_path = "Example_images\Example_person.png"
 image = Image.open(img_path)
 
 #Get possible subjects
@@ -18,6 +18,7 @@ possible_subjects = get_possible_subjects(image)
 print("List of possible subjects:")
 for i, subject in enumerate(possible_subjects):
     print(f"{i+1}. {subject}")
+    
 print("Write the number or name of the subject you want to reframe or write show to see the object detection result.")
 subject = None
 
@@ -72,9 +73,10 @@ if do_infill:
     prompt = input("Prompt: ")
 
 
-image = Infill(image, mask, prompt = prompt)
+    image = Infill(image, mask, prompt = prompt)
 
-
+from reframe import Draw_thirds
 #plot new image
 plt.imshow(image)
+Draw_thirds(image.shape[0], image.shape[1])
 plt.show()

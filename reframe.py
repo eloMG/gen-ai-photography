@@ -61,6 +61,7 @@ def get_person_cordinate(image):
     Returns:
     tuple: A tuple of two integers representing the average position of the person's head in the image.
     """
+    image = image.convert("RGB")
     
     #get the model
     processor = SegformerImageProcessor.from_pretrained("mattmdjaga/segformer_b2_clothes")
@@ -128,6 +129,7 @@ def get_person_cordinate(image):
     return head_avg_position
 
 def Display_object_detection(image,confidence_threshold=0.92):
+    image = image.convert("RGB")
     processor = DetrImageProcessor.from_pretrained("facebook/detr-resnet-50", revision="no_timm")
     model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50", revision="no_timm")
 
@@ -152,6 +154,7 @@ def Display_object_detection(image,confidence_threshold=0.92):
 
 
 def crop_subjects(image, subject, confidence_threshold=0.92, return_boxes=False):
+    image = image.convert("RGB")
     processor = DetrImageProcessor.from_pretrained("facebook/detr-resnet-50", revision="no_timm")
     model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50", revision="no_timm")
 
@@ -180,7 +183,7 @@ def crop_subjects(image, subject, confidence_threshold=0.92, return_boxes=False)
 
 
 def get_possible_subjects(image, confidence_threshold=0.92):
-    #needs to test
+    image = image.convert("RGB")
     
     processor = DetrImageProcessor.from_pretrained("facebook/detr-resnet-50", revision="no_timm")
     model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50", revision="no_timm")

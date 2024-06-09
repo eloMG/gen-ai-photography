@@ -7,6 +7,7 @@ from diffusers import StableDiffusionInpaintPipeline
 
 
 def Infill(image, mask, prompt = ""):
+
     #checks if infill is needed
     infill_needed = mask.any()
     if infill_needed:

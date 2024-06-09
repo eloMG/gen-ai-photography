@@ -218,6 +218,8 @@ def get_possible_subjects(image, confidence_threshold=0.92):
 def zoom_image_and_mask(image, mask, zoom_factor, origin):
     # Calculate the new shape of the image
     
+    image = image[:,:,:3]#remove alpha channel if it exists
+    
     new_image = np.zeros_like(image)
     new_mask = np.ones_like(mask).astype(bool)
     

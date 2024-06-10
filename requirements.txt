@@ -2,10 +2,10 @@ diffusers==0.28.2
 gdown==5.2.0
 matplotlib==3.8.3
 numpy==1.25.2
-Pillow==10.3.0
+Pillow==10.0.0
 Requests==2.32.3
 scipy==1.13.1
-torch==2.2.2+cu121
+torch==2.2.2
 torchvision==0.17.2
 tqdm==4.66.2
 transformers==4.39.0

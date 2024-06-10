@@ -1,7 +1,5 @@
 from transformers import MaskFormerFeatureExtractor, MaskFormerForInstanceSegmentation
 from PIL import Image
-import requests
-import matplotlib.pyplot as plt
 import numpy as np
 
 def get_segmentation_map(image, print_labels = False):

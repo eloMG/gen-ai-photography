@@ -6,7 +6,7 @@ from transformers import SegformerImageProcessor, AutoModelForSemanticSegmentati
 from PIL import Image
 import torch.nn as nn
 from scipy.ndimage import zoom
-
+import random
 
 def Draw_thirds(height, width):
     plt.axhline(height / 3, color='blue')
@@ -46,6 +46,11 @@ def get_center_box(box):
     x1, y1, x2, y2 = box
     center = [(y1 + y2) / 2,  (x1 + x2)/ 2]
     return center
+
+def set_seed(seed):
+    torch.manual_seed(seed)
+    random.seed(seed)
+    np.random.seed(seed) 
 
 
 def get_person_cordinate(image, return_segmentation = False, return_head_segmentation = False):

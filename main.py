@@ -9,7 +9,7 @@ from reframe import get_possible_subjects, refram_to_thirds, Display_object_dete
 
 #importing image temporarily will later take input from earlier in pipline
 #Image path 
-img_path = "Example_images\Example_objects.png"
+img_path = "report_images\Example_objects.png"
 image = Image.open(img_path)
 
 #Get possible subjects

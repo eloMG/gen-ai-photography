@@ -19,7 +19,7 @@ test3.py
 Test_data/
 dataset/data/datasetImages_originalSize/
 dataset/data/imgListFiles_label/
-dataset/data/saved/
 dataset/__pycache__/
-*_scores.txt
 test*
+.ipynb_checkpoints/
+*.npy

@@ -25,3 +25,11 @@ Here is a list of tasks:
 4. Design a chatbot that provides hints on how to improve an image.
 
 The submitted report, with more details on the above tasks, is contained in `report.ipynb`.
+
+## Running the reframing pipeline
+
+To run the reframing pipeline, execute `main.py`. Make sure to change the variable `img_path` to the path of your chosen image. By default, `img_path` is set with an example image, which you can also use.
+
+```python
+# Example usage
+img_path = 'path/to/your/image.jpg'  # Change this to your image path

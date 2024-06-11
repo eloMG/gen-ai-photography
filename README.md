@@ -35,4 +35,7 @@ To run the reframing pipeline, execute `main.py`. Make sure to change the variab
 img_path = "report_images\Example_objects.png"  # Change this to your image path
 
 ```
+After excecution just follow instructions in terminal or comand prompt. 
+
 The pipeline has been tested with JPG and PNG images, but other formats might work as well.
+
